@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+      <title>Node JS test</title>
+      <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  </head>
+  <body>
+    <p><h1>From for create new operation:</h1></p>
+    <p><font>Номер договора: </font><input id="contract" type="text" /></p>
+    <p><font>Сумма:          </font><input id="bill" type="text" /></p>
+    <p>
+      <select id="select_type">
+        <option>Пополнение</option>
+        <option>Снятие</option>
+      </select>
+    </p>
+    <p><button id="sendRequest">Отправить</button></p>
+  </body>
+  <script type="text/javascript">
+    var button = document.getElementById("sendRequest");
+    var contract_field = document.getElementById("contract");
+    var bill_field = document.getElementById("bill");
+    var type_field = document.getElementById("select_type");
+
+    button.addEventListener("click", clickHandler);
+
+    function clickHandler() {
+      let data = {
+        contract_id: parseFloat(contract_field.value),
+        bill: parseFloat(bill_field.value),
+        type: type_field.selectedIndex === 0
+      };
+      axios.post('/api/add/', data).then(function (response) {
+        alert(response);
+      }).catch(function (error) {
+        alert(error);
+      });
+    }
+  </script>
+</html>
