@@ -6,32 +6,12 @@ const connect = mysql.createConnection({
 	database : 'testCards'
 });
 
-function dumpDBcards() {
-	connect.query("SELECT contract_id FROM cards", function(err, result) {
-		if (err) {
-			console.log(err);
-			return null;
-		}
-		else {
-			console.log(result);
-			return result;
-		}
-		return null;
-	});
+function dumpDBcards(callback) {
+	connect.query("SELECT * FROM cards", callback);
 }
 
-function dumpDBoperations() {
-	connect.query("SELECT card_id FROM operations", function(err, result) {
-		if (err) {
-			console.log(err);
-			return null;
-		}
-		else {
-			console.log(result);
-			return result;
-		}
-		return null;
-	});
+function dumpDBoperations(callback) {
+	connect.query("SELECT * FROM operations", callback);
 }
 
 function insertInCards(newVal) {
