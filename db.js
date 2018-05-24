@@ -6,12 +6,12 @@ const connect = mysql.createConnection({
 	database : 'testCards'
 });
 
-function dumpDBcards(callback) {
-	connect.query("SELECT * FROM cards", callback);
+function dumpDB(db, selector, callback) {
+	connect.query("SELECT * FROM ?? WHERE ??", [db, selector], callback);
 }
 
-function dumpDBoperations(callback) {
-	connect.query("SELECT * FROM operations", callback);
+function changeRowInDB(db, values, selector, callback) {
+	connect.query("UPDATE ?? SET ?? WHERE ??", [db, values, selector], callback);
 }
 
 function insertInCards(newVal) {
@@ -48,8 +48,8 @@ function initTables() {
 		});
 }
 
-exports.selectFromCards = dumpDBcards;
-exports.selectFromOperations = dumpDBoperations;
+exports.selectFromDB = dumpDB;
+exports.changeRowInDB = changeRowInDB;
 exports.insertInCards = insertInCards;
 exports.insertInOperations = insertInOperations;
 exports.initTables = initTables;

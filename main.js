@@ -22,8 +22,8 @@ app.get('/', function(request, response) {
 	db.initTables();
 	response.send(html);
 	console.log("File send! 200");
-	db.selectFromOperations(default_callback);
-	db.selectFromCards(default_callback);
+	db.selectFromDB("cards", "contract_id", default_callback);
+	db.selectFromDB("operations", "contract_id", default_callback);
 });
 
 app.post('/api/add/', function(request, response) {
@@ -31,6 +31,17 @@ app.post('/api/add/', function(request, response) {
 	var dataInOperations = {contract_id: request.body.contract_id, bill: request.body.bill, type: request.body.type === true ? 'D' : 'W'};
 
 	if (dataInOperations.contract_id.length === 17 && dataInOperations.contract_id.startsWith("2625")) {
+		db.selectFromDB("cards", "contract_id=" + dataInCards.contract_id, function(err, res) {
+			if (res === undefined) {
+				console.log("res === undefined");
+				dataInCards.balance = dataInOperations.bill * (request.body.type === true ? 1 : -1);
+				db.insertInCards(dataInCards);
+			} else {
+				console.log("res not undefined");
+				dataInCards.balance = res.balance + (dataInOperations.bill * (request.body.type === true ? 1 : -1));
+				db.changeRowInDB("cards", "balance=" + dataInCards.balance, "contract_id=" + dataInCards.contract_id, default_callback);
+			}
+		});
 		db.insertInOperations(dataInOperations);
 		response.json(dataInCards);
         	response.end();
