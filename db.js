@@ -6,12 +6,16 @@ const connect = mysql.createConnection({
 	database : 'testCards'
 });
 
-function dumpDB(db, selector, callback) {
-	connect.query("SELECT * FROM ?? WHERE ??", [db, selector], callback);
+function dumpDB(db, callback) {
+	connect.query("SELECT * FROM ??", [db], callback);
+}
+
+function dumpDBwithSelector(db, selector, callback) {
+	connect.query("SELECT * FROM ?? WHERE contract_id=?", [db, selector], callback);
 }
 
 function changeRowInDB(db, values, selector, callback) {
-	connect.query("UPDATE ?? SET ?? WHERE ??", [db, values, selector], callback);
+	connect.query("UPDATE ?? SET balance=? WHERE contract_id=?", [db, values, selector], callback);
 }
 
 function insertInCards(newVal) {
@@ -49,6 +53,7 @@ function initTables() {
 }
 
 exports.selectFromDB = dumpDB;
+exports.selectFromDBwithSelector = dumpDBwithSelector;
 exports.changeRowInDB = changeRowInDB;
 exports.insertInCards = insertInCards;
 exports.insertInOperations = insertInOperations;

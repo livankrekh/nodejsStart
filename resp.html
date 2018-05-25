@@ -16,12 +16,18 @@
       </select>
     </p>
     <p><button id="sendRequest">Отправить</button></p>
+    <p><h2>Operations list:</h2></p>
+    <p>
+      <table id="operationsBoard">
+      </table>
+    </p>
   </body>
   <script type="text/javascript">
     var button = document.getElementById("sendRequest");
     var contract_field = document.getElementById("contract");
     var bill_field = document.getElementById("bill");
     var type_field = document.getElementById("select_type");
+    var div = document.getElementById("operationsBoard");
 
     button.addEventListener("click", clickHandler);
 
@@ -32,10 +38,39 @@
         type: type_field.selectedIndex === 0
       };
       axios.post('/api/add/', data).then(function (response) {
-        alert(response);
+        if (response.data === null) {
+          alert("Error - operation failed!");
+          return ;
+        }
+        dataParses(response.data, div);
       }).catch(function (error) {
-        alert(error);
+        console.log(error);
       });
+    }
+
+    function dataParses(data, div) {
+      while (div.firstChild) {
+        div.removeChild(div.firstChild);
+      }
+
+      if (data === null) {
+        return ;
+      }
+      for (var i = 0; i < data.length; i++) {
+        var newTr = document.createElement("tr");
+        var tdArray = [document.createElement("td"), document.createElement("td"), document.createElement("td"), document.createElement("td"), document.createElement("td")];
+
+        console.log(data[i].contract_id, data[i].bill, data[i].type);
+        tdArray[0].innerHTML = data[i].id;
+        tdArray[1].innerHTML = data[i].contract_id;
+        tdArray[2].innerHTML = data[i].bill;
+        tdArray[3].innerHTML = data[i].type;
+        tdArray[4].innerHTML = data[i].date;
+        for (var j = 0; j < tdArray.length; j++) {
+          newTr.appendChild(tdArray[j]);
+        }
+        div.appendChild(newTr);
+      }
     }
   </script>
 </html>
