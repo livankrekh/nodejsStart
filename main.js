@@ -32,6 +32,13 @@ app.get('/', function(request, response) {
 	db.selectFromDB("operations", default_callback);
 });
 
+app.get('/requestScript.js', function(request, response) {
+	var js = fs.readFileSync('requestScript.js', 'utf8');
+
+	response.send(js);
+	console.log("JS script send! 200");
+});
+
 app.post('/api/add/', function(request, response) {
 	var dataInCards = {contract_id: request.body.contract_id, balance: 0};
 	var dataInOperations = {contract_id: request.body.contract_id, bill: request.body.bill, type: request.body.type === true ? 'D' : 'W'};
