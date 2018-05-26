@@ -18,18 +18,16 @@ function changeRowInDB(db, values, selector, callback) {
 	connect.query("UPDATE ?? SET balance=? WHERE contract_id=?", [db, values, selector], callback);
 }
 
-function insertInCards(newVal) {
-	connect.query("INSERT INTO cards SET ?", newVal, function(err, result) {
-		if (err) console.log(err);
-		else console.log(result);
-	});
+function insertInCards(newVal, callback) {
+	connect.query("INSERT INTO cards SET ?", newVal, callback);
 }
 
-function insertInOperations(newVal) {
-	connect.query("INSERT INTO operations SET ?", newVal, function(err, result) {
-		if (err) console.log(err);
-		else console.log(result);
-	});
+function insertInOperations(newVal, callback) {
+	connect.query("INSERT INTO operations SET ?", newVal, callback);
+}
+
+function removeFromDB(db, id, callback) {
+	connect.query("DELETE FROM ?? WHERE id=?", [db, id], callback);
 }
 
 function initTables() {
@@ -57,4 +55,5 @@ exports.selectFromDBwithSelector = dumpDBwithSelector;
 exports.changeRowInDB = changeRowInDB;
 exports.insertInCards = insertInCards;
 exports.insertInOperations = insertInOperations;
+exports.removeFromDB = removeFromDB;
 exports.initTables = initTables;
