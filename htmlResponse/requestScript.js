@@ -20,9 +20,12 @@ function clickHandler() {
 	};
 	axios.post('/api/add/', data).then(function (response) {
 		if (response.data.error !== undefined) getError(response.data.error);
-		else dataParses(response.data, div);
+		else dataParser(response.data, div);
 	}).catch(function (error) {
-		getError(4);
+		if (error) {
+			console.log(error);
+			getError(4);
+		}
 	});
 }
 
@@ -35,7 +38,10 @@ function cancelHandler() {
 		if (response.data.error !== undefined) getError(response.data.error);
 		else dataParser(response.data, div);
 	}).catch(function (error) {
-		getError(4);
+		if (error) {
+			console.log(error);
+			getError(4);
+		}
 	});
 }
 

@@ -3,7 +3,7 @@ var fs = require('fs');
 var bodyParser = require('body-parser');
 var express = require('express');
 var async = require('async');
-var db = require('./db.js');
+var db = require('./modules/db.js');
 
 var app = express();
 
@@ -67,6 +67,7 @@ app.post('/api/add/', function(request, response) {
 	var dataInCards = {contract_id: request.body.contract_id, balance: 0};
 	var dataInOperations = {contract_id: request.body.contract_id, bill: request.body.bill, type: request.body.type === true ? 'D' : 'W'};
 	var taxMoney = dataInOperations.bill * 0.01;
+	dataInOperations.bill = (dataInOperations.bill * 1.0) + (taxMoney * dataInOperations.type === 'D' ? -1.0 : 1.0);
 
 	function getUserCard(callback) {
 		db.selectFromDBwithSelector("cards", dataInCards.contract_id, function(err, res) {
@@ -79,14 +80,13 @@ app.post('/api/add/', function(request, response) {
 	}
 
 	function changeUserBalance(prevResult, callback) {
-		var addBalance = (!prevResult || prevResult.length === 0 ? 0 : prevResult[0].balance) + (dataInOperations.bill * (dataInOperations.type === 'D' ? 1 : -1));
-		dataInOperations.bill = dataInOperations.bill - taxMoney;
+		var addBalance = (prevResult.length === 0 ? 0 : prevResult[0].balance) + (dataInOperations.bill * (dataInOperations.type === 'D' ? 1 : -1));
 		dataInCards.balance = addBalance;
 
 		if (checkCardTypeError(dataInOperations.contract_id, addBalance, callback) === false) {
 			return ;
 		}
-		if (!prevResult || prevResult.length === 0) {
+		if (prevResult.length === 0) {
 			db.insertInCards(dataInCards, function(err, res) {
 				if (err) {
 					callback(err, {error: 6});
@@ -95,7 +95,7 @@ app.post('/api/add/', function(request, response) {
 				}
 			});
 		} else {
-			db.insertInCards(dataInCards, function(err, res) {
+			db.changeRowInDB("cards", dataInCards.balance, dataInCards.contract_id, function(err, res) {
 				if (err) {
 					callback(err, {error: 6});
 				} else {
@@ -164,6 +164,10 @@ app.post('/api/add/', function(request, response) {
 				response.end();
 			}
 		});
+	} else {
+		console.log("Entered not valid data from contract_id - " + dataInOperations.contract_id);
+		response.json({error: 1});
+		response.end();
 	}
 });
 
