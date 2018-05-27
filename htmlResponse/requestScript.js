@@ -33,7 +33,7 @@ function cancelHandler() {
 	};
 	axios.post('/api/cancel/', data).then(function (response) {
 		if (response.data.error !== undefined) getError(response.data.error);
-		else dataParses(response.data, div);
+		else dataParser(response.data, div);
 	}).catch(function (error) {
 		getError(4);
 	});
@@ -41,19 +41,24 @@ function cancelHandler() {
 
 function getError(errorCode) {
 	switch (errorCode) {
-		case 1: alert("Непривильно введены данные!\nНомер договора начинается с цифр '2625' и имеет 17 цифр\nСчет не может быть равень нулю");
-		case 2: alert("Ошибка: не удалось внести данные в базу данных операций");
-		case 3: alert("Ошибка: не удалось извлечь данные из базы данных договоров");
-		case 4: alert("Ошибка: не удалось получить ответ от сервера");
-		case 5: alert("Ошибка: не удалось внести данные в базу данных операций");
-		case 6: alert("Ошибка: не удалось изменить данные вашего договора");
-		case 7: alert("Неправильный токен отмены операции");
-		case 8: alert("Ошибка: не удалось извлечь данные из базы данных операций");
-		case 9: alert("Ошибка: не удалось изменить базу данных операций");
+		case 1: alert("Непривильно введены данные!\nНомер договора начинается с цифр '2625' и имеет 17 цифр\nСчет не может быть равень нулю"); break ;
+		case 2: alert("Ошибка: не удалось внести данные в базу данных операций"); break ;
+		case 3: alert("Ошибка: не удалось извлечь данные из базы данных договоров"); break ;
+		case 4: alert("Ошибка: не удалось получить ответ от сервера"); break ;
+		case 5: alert("Ошибка: не удалось внести данные в базу данных операций"); break ;
+		case 6: alert("Ошибка: не удалось изменить данные вашего договора"); break ;
+		case 7: alert("Неправильный токен отмены операции"); break ;
+		case 8: alert("Ошибка: не удалось извлечь данные из базы данных операций"); break ;
+		case 9: alert("Ошибка: не удалось изменить базу данных операций"); break ;
+		case 10: alert("Ошибка: не удалось изьять комиссию за услуги"); break ;
+		case 11: alert("Ошибка: Дебитная карта не может иметь кредитные средства"); break ;
+		case 12: alert("Ошибка: Универсальная карта может иметь кредит не более, чем на 50000 UAH"); break ;
+		case 13: alert("Ошибка: Кредитная карта может иметь не более 150000 UAH кредита и не может иметь некредитные средства"); break ;
+		case 14: alert("Ошибка: не удалось узнать тип кредитной карты"); break ;
 	}
 }
 
-function dataParses(data, div) {
+function dataParser(data, div) {
 	while (div.firstChild) {
 		div.removeChild(div.firstChild);
 	}

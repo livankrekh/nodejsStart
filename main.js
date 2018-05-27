@@ -17,8 +17,35 @@ function default_callback(err, res) {
 	}
 }
 
+function checkCardTypeError(contract_id, balance, callback) {
+	switch (contract_id[4]) {
+		case '1':
+			if (balance < 0) {
+				callback("Debit card cannot have negative balance for contract_id = " + contract_id, {error: 11});
+				return false;
+			}
+			break ;
+		case '2':
+			if (balance < 50000) {
+				callback("Universal card cannot have credit over 50000 UAH for contract_id = " + contract_id, {error: 12});
+				return false;
+			}
+			break ;
+		case '3':
+			if (balance > 0 || balance < 150000) {
+				callback("Credit card cannot have positive balance or credit over 150000 UAH for contract_id = " + contract_id, {error: 13});
+				return false;
+			}
+			break ;
+		default:
+			callback("Cannot detect type of card for contract_id = " + contract_id, {error: 14});
+			return false;
+	}
+	return true;
+}
+
 app.get('/', function(request, response) {
-	var html = fs.readFileSync('resp.html', 'utf8');
+	var html = fs.readFileSync('htmlResponse/resp.html', 'utf8');
 
 	db.initTables();
 	response.send(html);
@@ -28,7 +55,7 @@ app.get('/', function(request, response) {
 });
 
 app.get('/requestScript.js', function(request, response) {
-	var js = fs.readFileSync('requestScript.js', 'utf8');
+	var js = fs.readFileSync('htmlResponse/requestScript.js', 'utf8');
 
 	response.send(js);
 	console.log("JS script send! 200");
@@ -39,6 +66,7 @@ app.get('/requestScript.js', function(request, response) {
 app.post('/api/add/', function(request, response) {
 	var dataInCards = {contract_id: request.body.contract_id, balance: 0};
 	var dataInOperations = {contract_id: request.body.contract_id, bill: request.body.bill, type: request.body.type === true ? 'D' : 'W'};
+	var taxMoney = dataInOperations.bill * 0.01;
 
 	function getUserCard(callback) {
 		db.selectFromDBwithSelector("cards", dataInCards.contract_id, function(err, res) {
@@ -51,8 +79,14 @@ app.post('/api/add/', function(request, response) {
 	}
 
 	function changeUserBalance(prevResult, callback) {
+		var addBalance = (!prevResult || prevResult.length === 0 ? 0 : prevResult[0].balance) + (dataInOperations.bill * (dataInOperations.type === 'D' ? 1 : -1));
+		dataInOperations.bill = dataInOperations.bill - taxMoney;
+		dataInCards.balance = addBalance;
+
+		if (checkCardTypeError(dataInOperations.contract_id, addBalance, callback) === false) {
+			return ;
+		}
 		if (!prevResult || prevResult.length === 0) {
-			dataInCards.balance = dataInOperations.bill * (request.body.type ? 1 : -1);
 			db.insertInCards(dataInCards, function(err, res) {
 				if (err) {
 					callback(err, {error: 6});
@@ -61,7 +95,6 @@ app.post('/api/add/', function(request, response) {
 				}
 			});
 		} else {
-			dataInCards.balance = prevResult[0].balance + (dataInOperations.bill * (request.body.type === true ? 1 : -1));
 			db.insertInCards(dataInCards, function(err, res) {
 				if (err) {
 					callback(err, {error: 6});
@@ -76,6 +109,28 @@ app.post('/api/add/', function(request, response) {
 		db.insertInOperations(dataInOperations, function (err, res) {
 			if (err) {
 				callback(err, {error: 5});
+			} else {
+				callback(null);
+			}
+		});
+	}
+
+	function getTax(callback) {
+		db.selectFromDBwithSelector("cards", "26250111111111111", function(err, res) {
+			if (err || res.length === 0) {
+				callback(err, {error: 10});
+			} else {
+				callback(null, res[0]);
+			}
+		});
+	}
+
+	function takeTax(result, callback) {
+		var newTaxBalance = result.balance + taxMoney;
+		
+		db.changeRowInDB("cards", newTaxBalance, result.contract_id, function(err, res) {
+			if (err) {
+				callback(err, {error: 10});
 			} else {
 				callback(null);
 			}
@@ -98,11 +153,13 @@ app.post('/api/add/', function(request, response) {
 			getUserCard,
 			changeUserBalance,
 			addNewOperation,
+			getTax,
+			takeTax,
 			getAllDataAndResponce
 		],
 		function(error, errorCode) {
-			if (err) {
-				console.log(err);
+			if (error) {
+				console.log(error);
 				response.json(errorCode);
 				response.end();
 			}

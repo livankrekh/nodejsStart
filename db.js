@@ -6,6 +6,14 @@ const connect = mysql.createConnection({
 	database : 'testCards'
 });
 
+function default_callback(err, res) {
+	if (err) {
+		console.log(err);
+	} else {
+		console.log(res);
+	}
+}
+
 function dumpDB(db, callback) {
 	connect.query("SELECT * FROM ??", [db], callback);
 }
@@ -46,6 +54,16 @@ function initTables() {
 				console.log(error);
 			} else {
 				console.log("Default table 'cards' in 'testCards' database created!");
+				dumpDBwithSelector("cards", "26250111111111111", function(err, res) {
+					var default_dataInCards = {contract_id: "26250111111111111", balance: 0};
+
+					if (err) {
+						console.log(err);
+					} else if (res.length === 0) {
+						console.log("Tax contract was created!");
+						insertInCards(default_dataInCards, default_callback);
+					}
+				});
 			}
 		});
 }
