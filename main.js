@@ -55,7 +55,7 @@ app.get('/', function(request, response) {
 });
 
 app.get('/requestScript.js', function(request, response) {
-	var js = fs.readFileSync('htmlResponse/requestScript.js', 'utf8');
+	var js = fs.readFileSync('./htmlResponse/requestScript.js', 'utf8');
 
 	response.send(js);
 	console.log("JS script send! 200");
@@ -67,7 +67,7 @@ app.post('/api/add/', function(request, response) {
 	var dataInCards = {contract_id: request.body.contract_id, balance: 0};
 	var dataInOperations = {contract_id: request.body.contract_id, bill: request.body.bill, type: request.body.type === true ? 'D' : 'W'};
 	var taxMoney = dataInOperations.bill * 0.01;
-	dataInOperations.bill = (dataInOperations.bill * 1.0) + (taxMoney * dataInOperations.type === 'D' ? -1.0 : 1.0);
+	dataInOperations.bill = (dataInOperations.bill * 1.0) + (taxMoney * (dataInOperations.type === 'D' ? -1.0 : 1.0));
 
 	function getUserCard(callback) {
 		db.selectFromDBwithSelector("cards", dataInCards.contract_id, function(err, res) {
