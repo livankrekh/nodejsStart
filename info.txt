@@ -1,0 +1,1 @@
+This file just for testing new branch of git repository
